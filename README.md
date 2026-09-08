@@ -35,7 +35,7 @@ Ledger says so.
 | File | What it is |
 |---|---|
 | `index.html` | The whole app. HTML, CSS and JS inline, three tabs. ~62 KB. |
-| `sw.js` | Service worker. Cache-first shell so the app opens with no signal. |
+| `sw.js` | Service worker. Network-first for the page, cache-first for assets. |
 | `manifest.webmanifest` | Makes it installable to the home screen. |
 | `icon-*.png` | App icons — 192, 512, maskable 512, and 180 for iOS. |
 
@@ -120,4 +120,12 @@ can't drift apart.
 ## Changing it
 
 Edit `index.html` directly. If you change any file, bump `CACHE` in `sw.js`
-(`hour-debt-v4` → `v5`), or installed copies keep serving the old shell.
+(`hour-debt-v5` → `v6`) so installed copies drop the old assets.
+
+The page itself is fetched **network-first**: online you always get the current
+deploy on the next load, offline you get the cached copy. Cache-first was the
+original design and it was wrong — it served the previous deploy every time, and
+because the background refresh went through a plain `fetch()` the browser's own
+HTTP cache could answer it with the stale file, so an out-of-date shell could
+keep re-caching itself. The install step now fetches with `cache: "reload"` too,
+so installing *during* a deploy cannot bake a stale page into a fresh cache.
