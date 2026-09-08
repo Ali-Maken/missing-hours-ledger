@@ -1,7 +1,7 @@
 /* Hour Debt Ledger — offline cache.
    Cache-first for the shell: once installed, the app never needs the network.
    Bump CACHE when you change any file below. */
-const CACHE = "hour-debt-v3";
+const CACHE = "hour-debt-v4";
 const SHELL = [
   "./",
   "./index.html",

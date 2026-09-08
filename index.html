@@ -137,12 +137,25 @@
   .track > i { display: block; height: 100%; background: var(--credit); }
   .track-cap { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-top: 6px; }
 
-  /* ---- leave-at hero ---- */
-  .leaveat { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-  .leaveat .main .k { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); font-weight: 600; }
-  .leaveat .main .v { font-size: 38px; font-weight: 600; letter-spacing: -.02em; line-height: 1.05; }
-  .leaveat .alt { text-align: right; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
-  .leaveat .alt b { font-weight: 600; color: var(--ink); }
+  /* ---- the one number ---- */
+  .hero { text-align: center; padding: 10px 0 4px; }
+  .hero .k { font-size: 11px; text-transform: uppercase; letter-spacing: .11em; color: var(--ink-3); font-weight: 600; }
+  .hero .v { font-size: 68px; font-weight: 600; letter-spacing: -.04em; line-height: 1; margin-top: 6px; }
+  .hero .v.done { color: var(--credit); }
+  .hero .v.small { font-size: 34px; letter-spacing: -.02em; }
+  .hero .s { font-size: 12.5px; color: var(--ink-2); margin-top: 8px; min-height: 1.4em; }
+
+  /* ---- quiet status line: the only other thing on the Today screen ---- */
+  .statusline {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+    width: 100%; text-align: left; padding: 11px 14px; min-height: 0;
+    background: transparent; border: 1px solid var(--rule); border-radius: var(--r);
+    color: var(--ink-2); font-size: 12.5px; font-weight: 400;
+  }
+  .statusline .sl-a { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .statusline .sl-a.neg { color: var(--debt); }
+  .statusline .sl-a.pos { color: var(--credit); }
+  .statusline .sl-c { color: var(--ink-3); font-size: 17px; }
 
   .meterwrap { display: flex; flex-direction: column; gap: 5px; }
   .meter { height: 10px; border-radius: 5px; background: var(--rule-soft); position: relative; overflow: hidden; }
@@ -201,7 +214,7 @@
     padding: 3px 8px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2); background: var(--card);
     white-space: nowrap;
   }
-  .chip.work { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .chip.work { color: var(--ink-3); }
   .chip.leave { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
   .chip.holiday { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
   .chip.off { color: var(--ink-3); }
@@ -221,29 +234,35 @@
   .stat .v { font-size: 21px; font-weight: 600; letter-spacing: -.02em; margin-top: 2px; }
   .stat .h { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
 
-  /* ---- ledger ---- */
-  .ledger { display: flex; flex-direction: column; }
-  .lrow {
-    display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 10px;
-    padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); cursor: pointer; text-align: left;
-    background: transparent; border-left: 0; border-right: 0; border-top: 0; border-radius: 0; min-height: 0;
-    font-size: 14px; width: 100%; color: var(--ink);
+  /* ---- month grid: the record and the plan in one object ---- */
+  .calwrap { padding: 12px 12px 6px; }
+  .caldow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 7px; }
+  .caldow span { text-align: center; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .calgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal {
+    aspect-ratio: 1 / 1; min-height: 0; padding: 0; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums;
+    background: var(--card-2); border: 1px solid transparent; color: var(--ink-2);
   }
-  .lrow:last-child { border-bottom: 0; }
-  .lrow[aria-current="true"] { background: var(--card-2); }
-  .lrow .d { font-size: 12.5px; color: var(--ink-2); }
-  .lrow .d em { font-style: normal; color: var(--ink-3); }
-  .lrow .w { font-size: 13px; color: var(--ink-2); }
-  .lrow .delta { font-weight: 600; font-size: 14px; }
-  .delta.neg { color: var(--debt); }
-  .delta.pos { color: var(--credit); }
-  .delta.zero { color: var(--ink-3); }
-
-  .weekhdr {
-    padding: 7px 14px; background: var(--card-2); border-bottom: 1px solid var(--rule-soft);
-    font-size: 10.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); font-weight: 600;
-    display: flex; justify-content: space-between;
+  .cal.blank { background: transparent; border-color: transparent; pointer-events: none; }
+  .cal.off { background: transparent; color: var(--ink-3); opacity: .5; }
+  .cal.future { background: transparent; border-color: var(--rule); color: var(--ink-2); }
+  .cal.unlogged { background: transparent; border: 1px dashed var(--warn); color: var(--warn); }
+  .cal.leave { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+  .cal.strong { color: #fff; }
+  .cal.today { box-shadow: 0 0 0 2px var(--accent); }
+  .cal:active { transform: none; opacity: .8; }
+  .calfoot {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 10px 14px 12px; font-size: 12px; color: var(--ink-3);
+    border-top: 1px solid var(--rule-soft); margin-top: 8px;
   }
+  .calfoot b { font-weight: 600; color: var(--ink-2); }
+  .calfoot .neg { color: var(--debt); }
+  .calfoot .pos { color: var(--credit); }
+  .calnav { display: flex; align-items: center; gap: 2px; }
+  .calnav button { min-height: 30px; padding: 2px 9px; font-size: 16px; color: var(--ink-2); background: transparent; border-color: transparent; }
 
   details.panel { border-top: 1px solid var(--rule-soft); }
   details.panel > summary {
@@ -268,6 +287,43 @@
 
   .sync.bad { color: var(--debt); }
 
+  /* ---- tabs ---- */
+  .tab[hidden] { display: none; }
+  .tab { display: flex; flex-direction: column; gap: 12px; }
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    background: var(--card); border-top: 1px solid var(--rule);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar button {
+    background: transparent; border: 0; border-radius: 0; min-height: 54px;
+    flex-direction: column; gap: 2px; color: var(--ink-3);
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
+  }
+  .tabbar button .g { font-size: 17px; line-height: 1; font-weight: 400; letter-spacing: 0; }
+  .tabbar button[aria-selected="true"] { color: var(--accent); box-shadow: inset 0 2px 0 var(--accent); }
+  .tabbar button:active { transform: none; }
+
+  /* ---- settings rows ---- */
+  .set { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); }
+  .set:last-child { border-bottom: 0; }
+  .set > .k { font-size: 14px; }
+  .set > .k small { display: block; font-size: 11.5px; color: var(--ink-3); font-weight: 400; line-height: 1.4; margin-top: 1px; }
+  .set > .c { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+  .set input[type="number"] { width: 62px; text-align: right; }
+  .set.off > .k { color: var(--ink-3); }
+  .set select { max-width: 168px; }
+
+  /* secondary control: present, but not asking for attention */
+  .quiet { display: flex; justify-content: center; padding-top: 2px; }
+  .quiet select {
+    background: transparent; border-color: transparent; color: var(--ink-3);
+    font-size: 12.5px; min-height: 30px; padding: 2px 4px; text-align: center;
+    font-family: inherit;
+  }
+  .quiet select:hover { color: var(--ink-2); }
+
   /* installed-app chrome: respect the notch and the home indicator */
   .wrap { padding-top: max(14px, env(safe-area-inset-top)); padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)); }
 
@@ -282,38 +338,26 @@
 <div class="wrap">
 
   <div class="masthead">
-    <h1>Hour Debt Ledger</h1>
+    <h1 id="mastTitle">Hour Debt Ledger</h1>
     <span class="sub sync" id="syncState">on device</span>
   </div>
 
-  <section class="card">
-    <div class="balance">
-      <div class="lbl">Balance to year end</div>
-      <div class="big mono neg" id="balBig">−64h 23m</div>
-      <div class="note" id="balNote">Loading…</div>
-      <div class="track"><i id="trackFill" style="width:0%"></i></div>
-      <div class="track-cap"><span id="trackA">0h cleared</span><span id="trackB">of 64h 23m</span></div>
-    </div>
-  </section>
+<div class="tab" id="tabToday">
 
   <div id="alerts"></div>
   <div class="banner install" id="installHint"></div>
 
-  <section class="card" id="todayCard">
+  <section class="card">
     <div class="head">
       <span class="t" id="todayLabel">Today</span>
       <span class="chip work" id="todayChip">Workday</span>
     </div>
     <div class="body">
-      <div class="leaveat">
-        <div class="main">
-          <div class="k">Log out at</div>
-          <div class="v mono" id="leaveAt">—</div>
-        </div>
-        <div class="alt">
-          <div>break even <b class="mono" id="evenAt">—</b></div>
-          <div id="leaveNowNote">leave now → <b class="mono">—</b></div>
-        </div>
+
+      <div class="hero">
+        <div class="k" id="heroK">Log out at</div>
+        <div class="v mono" id="leaveAt">&mdash;</div>
+        <div class="s" id="heroSub">&nbsp;</div>
       </div>
 
       <div class="meterwrap">
@@ -323,7 +367,7 @@
         </div>
         <div class="meterlabels">
           <span id="dayWorked">0h 00m worked</span>
-          <span id="dayTarget">target 8h 47m</span>
+          <span id="dayTarget">&mdash;</span>
         </div>
       </div>
 
@@ -333,88 +377,154 @@
         <button id="punchBtn" class="primary">Clock in now</button>
         <button id="addBtn" class="ghost">Add block</button>
       </div>
-      <div class="row">
-        <select id="dayTypeSel" aria-label="Day type">
-          <option value="work">Working day</option>
-          <option value="leave">Leave (paid)</option>
-          <option value="holiday">Public holiday</option>
-          <option value="off">Weekend / off</option>
+      <div class="quiet">
+        <select id="dayTypeSel" aria-label="Change what this day counts as">
+          <option value="work">Counts as a working day</option>
+          <option value="leave">Counts as leave</option>
+          <option value="holiday">Counts as a public holiday</option>
+          <option value="off">Counts as a day off</option>
         </select>
-        <input type="date" id="dayJump" aria-label="Jump to date">
+      </div>
+    </div>
+  </section>
+
+  <button class="statusline" id="statusLine">
+    <span class="sl-a mono" id="slBal">&mdash;</span>
+    <span class="sl-b" id="slNote">&mdash;</span>
+    <span class="sl-c" aria-hidden="true">&rsaquo;</span>
+  </button>
+
+</div><!-- /tabToday -->
+
+<div class="tab" id="tabLedger" hidden>
+
+  <section class="card">
+    <div class="balance">
+      <div class="lbl">Balance to clear</div>
+      <div class="big mono neg" id="balBig">&mdash;</div>
+      <div class="note" id="balNote">&nbsp;</div>
+      <div style="margin-top:6px"><span class="chip" id="paceTarget">&mdash;</span></div>
+      <div class="track"><i id="trackFill" style="width:0%"></i></div>
+      <div class="track-cap"><span id="trackA">&mdash;</span><span id="trackB">&mdash;</span></div>
+    </div>
+    <div class="stats" style="border-top:1px solid var(--rule-soft)">
+      <div class="stat"><div class="k">Extra per day</div><div class="v mono" id="pDay">&mdash;</div><div class="h" id="pDayH">&nbsp;</div></div>
+      <div class="stat"><div class="k">Workdays left</div><div class="v mono" id="pDays">&mdash;</div><div class="h" id="pDaysH">incl. today</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <span class="t" id="calMonth">&mdash;</span>
+      <span class="calnav">
+        <button id="calPrev" aria-label="Previous month">&lsaquo;</button>
+        <button id="calToday" aria-label="Jump to this month" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600">Now</button>
+        <button id="calNext" aria-label="Next month">&rsaquo;</button>
+      </span>
+    </div>
+    <div class="calwrap">
+      <div class="caldow" id="calDow"></div>
+      <div class="calgrid" id="calGrid"></div>
+    </div>
+    <div class="calfoot"><span id="calFootA">&mdash;</span><span id="calFootB"></span></div>
+  </section>
+
+</div><!-- /tabLedger -->
+
+<div class="tab" id="tabSettings" hidden>
+
+  <section class="card">
+    <div class="head"><span class="t">Balance</span><span class="chip" id="setBalChip">not set</span></div>
+    <div class="body">
+      <div class="field">
+        <label>Official balance from the HR portal</label>
+        <div class="inline">
+          <select id="cfgSign"><option value="-">behind by</option><option value="+">ahead by</option></select>
+          <input type="number" id="cfgH" min="0" max="999" step="1" inputmode="numeric" aria-label="Hours"><span class="dash">h</span>
+          <input type="number" id="cfgM" min="0" max="59" step="1" inputmode="numeric" aria-label="Minutes"><span class="dash">m</span>
+        </div>
+        <div class="inline"><span class="dash">as of end of</span><input type="date" id="cfgAsOf"></div>
+        <div class="hint">Everything in the app is calculated from here. Days on or before this date stop counting, so set it to the last day the portal figure already covers &mdash; then re-enter the portal figure every week or two so the two never drift apart.</div>
+      </div>
+      <div class="field">
+        <label>Clear the debt by</label>
+        <input type="date" id="cfgTarget">
+        <div class="hint">Holidays and leave don't shrink the debt &mdash; they only remove days you could have used to pay it off, so an earlier date buys you a buffer.</div>
+      </div>
+      <div class="field">
+        <label>How to spread the catch-up</label>
+        <select id="cfgCatchUp">
+          <option value="even">Evenly over the days left</option>
+          <option value="fixed">A fixed amount each day</option>
+        </select>
+        <div class="set" id="fixedRow">
+          <div class="k">Extra per day<small>Anything left over lands on the last days.</small></div>
+          <div class="c"><input type="number" id="cfgFixedH" min="0" max="8" step="1" inputmode="numeric" aria-label="Extra hours"><span class="dash">h</span><input type="number" id="cfgFixedM" min="0" max="59" step="5" inputmode="numeric" aria-label="Extra minutes"><span class="dash">m</span></div>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="card">
-    <div class="head"><span class="t">Pace</span><span class="chip" id="paceTarget">to 31 Dec</span></div>
-    <div class="stats">
-      <div class="stat"><div class="k">Extra per day</div><div class="v mono" id="pDay">—</div><div class="h" id="pDayH">on top of your normal shift</div></div>
-      <div class="stat"><div class="k">Extra per week</div><div class="v mono" id="pWeek">—</div><div class="h" id="pWeekH">5-day week</div></div>
-      <div class="stat"><div class="k">Workdays left</div><div class="v mono" id="pDays">—</div><div class="h" id="pDaysH">incl. today</div></div>
-      <div class="stat"><div class="k">Hours to log</div><div class="v mono" id="pHours">—</div><div class="h">normal + catch-up</div></div>
+    <div class="head"><span class="t">Standard week</span><span class="chip" id="setWeekChip">&mdash;</span></div>
+    <div class="body">
+      <div id="schedRows"></div>
+      <div class="hint">Hours required on each weekday. Set a day to <b>0</b> and it becomes a non-working day &mdash; nothing is required, and anything you log on it counts as pure credit.</div>
+      <div class="set">
+        <div class="k">Week starts on</div>
+        <div class="c"><select id="cfgWeekStart"><option value="1">Monday</option><option value="0">Sunday</option><option value="6">Saturday</option></select></div>
+      </div>
     </div>
-    <details class="panel">
-      <summary>This week</summary>
-      <div class="inner">
-        <div class="stats" style="border-radius:8px;overflow:hidden;border:1px solid var(--rule-soft)">
-          <div class="stat"><div class="k">Worked</div><div class="v mono" id="wkWorked">—</div></div>
-          <div class="stat"><div class="k">Required so far</div><div class="v mono" id="wkReq">—</div></div>
-          <div class="stat"><div class="k">Week balance</div><div class="v mono" id="wkBal">—</div></div>
-          <div class="stat"><div class="k">Left this week</div><div class="v mono" id="wkLeft">—</div></div>
-        </div>
-      </div>
-    </details>
   </section>
 
   <section class="card">
-    <div class="head"><span class="t">Ledger</span><button class="icon" id="rangeBtn">last 14 days ▾</button></div>
-    <div class="ledger" id="ledger"></div>
+    <div class="head"><span class="t">Public holidays &amp; days off</span><span class="chip" id="setHolChip">0</span></div>
+    <div class="body">
+      <div id="holList" class="inline"></div>
+      <div class="inline"><input type="date" id="holAdd" aria-label="Holiday date"><button id="holAddBtn" class="ghost">Add</button></div>
+      <div class="hint">Tap a date to remove it. To mark a single day as leave instead, open it in Today and change the day type there.</div>
+    </div>
   </section>
 
   <section class="card">
-    <details class="panel" id="setupPanel" style="border-top:0">
-      <summary>Settings &amp; resync</summary>
-      <div class="inner">
-        <div class="field">
-          <label>Official balance from the HR portal</label>
-          <div class="inline">
-            <select id="cfgSign"><option value="-">behind by</option><option value="+">ahead by</option></select>
-            <input type="number" id="cfgH" min="0" max="999" step="1" inputmode="numeric"><span class="dash">h</span>
-            <input type="number" id="cfgM" min="0" max="59" step="1" inputmode="numeric"><span class="dash">m</span>
-          </div>
-          <div class="inline"><span class="dash">as of end of</span><input type="date" id="cfgAsOf"></div>
-          <div class="hint">Everything above is calculated from here. Days on or before this date stop counting, so set it to the last day the portal figure already covers — then re-enter the portal figure every week or two so the two never drift apart.</div>
-        </div>
-        <div class="field">
-          <label>Standard day</label>
-          <div class="inline">
-            <span class="dash">Mon–Thu</span><input type="number" id="cfgMon" min="0" max="16" step="0.25" inputmode="decimal"><span class="dash">h</span>
-            <span class="dash">Fri</span><input type="number" id="cfgFri" min="0" max="16" step="0.25" inputmode="decimal"><span class="dash">h</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Clear the debt by</label>
-          <input type="date" id="cfgTarget">
-          <div class="hint">Public holidays and leave don't shrink the debt — they only remove days you could have used to pay it off. Finishing before 31 Dec leaves you a buffer.</div>
-        </div>
-        <div class="field">
-          <label>Public holidays</label>
-          <div id="holList" class="inline"></div>
-          <div class="inline"><input type="date" id="holAdd"><button id="holAddBtn" class="ghost">Add</button></div>
-        </div>
-        <div class="field">
-          <label>Data</label>
-          <div class="row"><button id="backupBtn" class="ghost">Save backup file</button><button id="restoreBtn" class="ghost">Restore from file</button></div>
-          <div class="row"><button id="exportBtn" class="ghost">Copy as JSON</button><button id="resetBtn" class="ghost">Clear all entries</button></div>
-          <input type="file" id="restoreFile" accept="application/json,.json" hidden>
-          <div class="hint">Everything lives in this browser's storage on this phone and never leaves it. That also means clearing site data wipes it &mdash; take a backup file every few weeks.</div>
-        </div>
+    <div class="head"><span class="t">Entry &amp; display</span></div>
+    <div class="body">
+      <div class="set">
+        <div class="k">Round clock in/out<small>Applies to the punch buttons, not to times you type.</small></div>
+        <div class="c"><select id="cfgRound">
+          <option value="0">Exact</option><option value="1">1 min</option>
+          <option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option>
+        </select></div>
       </div>
-    </details>
+      <div class="set">
+        <div class="k">Theme</div>
+        <div class="c"><select id="cfgTheme">
+          <option value="system">Match phone</option><option value="light">Light</option><option value="dark">Dark</option>
+        </select></div>
+      </div>
+    </div>
   </section>
 
-  <p class="foot" id="foot">Works with no signal. Times are yours to enter; nothing here talks to the HR system, and nothing leaves this phone. Treat the portal as the source of truth and resync the baseline above regularly.</p>
+  <section class="card">
+    <div class="head"><span class="t">Data</span><span class="chip" id="setDataChip">&mdash;</span></div>
+    <div class="body">
+      <div class="row"><button id="backupBtn" class="ghost">Save backup file</button><button id="restoreBtn" class="ghost">Restore from file</button></div>
+      <div class="row"><button id="exportBtn" class="ghost">Copy as JSON</button><button id="resetBtn" class="ghost">Clear all entries</button></div>
+      <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+      <div class="hint">Everything lives in this browser's storage on this device and never leaves it. That also means clearing site data wipes it &mdash; take a backup file every few weeks.</div>
+    </div>
+  </section>
+
+</div><!-- /tabSettings -->
+
+  <p class="foot" id="foot">Offline, on this device only. The HR portal stays the source of truth &mdash; resync the baseline in Settings every week or two.</p>
 </div>
+
+<nav class="tabbar" role="tablist">
+  <button role="tab" id="navToday"    aria-selected="true"  aria-controls="tabToday"><span class="g" aria-hidden="true">&#9679;</span>Today</button>
+  <button role="tab" id="navLedger"   aria-selected="false" aria-controls="tabLedger"><span class="g" aria-hidden="true">&#9776;</span>Ledger</button>
+  <button role="tab" id="navSettings" aria-selected="false" aria-controls="tabSettings"><span class="g" aria-hidden="true">&#9881;</span>Settings</button>
+</nav>
 
 <script>
 (function () {
@@ -426,18 +536,22 @@
 
   var DEFAULT_CONFIG = {
     configured: false,
-    baselineMin: 0,
-    baselineDate: "",              // balance is true as of END of this day
+    baselineMin: 0,                // balance in minutes at the END of baselineDate
+    baselineDate: "",
     targetDate: "",
-    minMonThu: 480,
-    minFri: 450,
-    holidays: ["2026-11-09", "2026-12-25"]
+    dayHours: { "0": 0, "1": 480, "2": 480, "3": 480, "4": 480, "5": 450, "6": 0 },
+    weekStart: 1,                  // 0 Sun, 1 Mon, 6 Sat
+    catchUp: "even",               // "even" spreads the debt | "fixed" adds a set amount
+    fixedExtraMin: 60,
+    roundMin: 5,                   // rounding applied to the punch buttons
+    theme: "system",               // system | light | dark
+    holidays: []
   };
 
   var config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   var days = {};                   // "YYYY-MM-DD" -> { type, segments:[{start,end}] }
   var viewDate = null;             // date shown in the Today card
-  var ledgerFull = false;
+  var calMonth = null;              // "YYYY-MM" shown in the grid
   var LS = "hourdebt.v1";
 
   /* ------------------------------------------------------------------ *
@@ -483,27 +597,60 @@
    * Day maths
    * ------------------------------------------------------------------ */
 
+  /** Hours the standard week asks for on this weekday, in minutes. */
+  function scheduledFor(ds) {
+    return Number(config.dayHours[String(parseYmd(ds).getDay())]) || 0;
+  }
+
   function dayType(ds) {
     var rec = days[ds];
     if (rec && rec.type) return rec.type;
     if (config.holidays.indexOf(ds) !== -1) return "holiday";
-    var w = parseYmd(ds).getDay();
-    if (w === 0 || w === 6) return "off";
-    return "work";
+    return scheduledFor(ds) > 0 ? "work" : "off";
   }
 
   function requiredFor(ds) {
-    if (dayType(ds) !== "work") return 0;
-    return parseYmd(ds).getDay() === 5 ? config.minFri : config.minMonThu;
+    return dayType(ds) !== "work" ? 0 : scheduledFor(ds);
+  }
+
+  /** The first day of the week containing ds, honouring the week-start setting. */
+  function weekStartOf(ds) {
+    var back = (parseYmd(ds).getDay() - config.weekStart + 7) % 7;
+    return addDays(ds, -back);
+  }
+
+  /** Extra minutes this day should carry on top of its standard shift. */
+  function extraFor(opening, ds) {
+    if (opening >= 0 || requiredFor(ds) === 0) return 0;
+    var debt = -opening;
+    if (config.catchUp === "fixed") return Math.min(config.fixedExtraMin, debt);
+    return Math.ceil(debt / Math.max(1, workdaysBetween(ds, config.targetDate)));
+  }
+
+  function roundPunch(m) {
+    var r = config.roundMin;
+    return r > 0 ? Math.round(m / r) * r : Math.round(m);
+  }
+
+  function applyTheme() {
+    var r = document.documentElement;
+    if (config.theme === "system") r.removeAttribute("data-theme");
+    else r.setAttribute("data-theme", config.theme);
   }
 
   function segMinutes(seg, ds) {
     var a = toMin(seg.start);
     if (a === null) return 0;
-    var b = seg.end === "" || seg.end == null ? (ds === today() ? nowMin() : null) : toMin(seg.end);
+    var running = seg.end === "" || seg.end == null;
+    var b = running ? (ds === today() ? nowMin() : null) : toMin(seg.end);
     if (b === null) return 0;
     var d = b - a;
-    if (d < 0) d += 1440;              // shift crossing midnight
+    if (d < 0) {
+      // A closed block that ends before it starts crossed midnight. A RUNNING
+      // one cannot have — rounding just put the start a minute ahead of now.
+      if (running) return 0;
+      d += 1440;
+    }
     return Math.max(0, d);
   }
 
@@ -547,7 +694,7 @@
   function workdaysBetween(from, to) {
     var n = 0, d = from, guard = 0;
     while (d <= to && guard++ < 800) {
-      if (dayType(d) === "work") n++;
+      if (requiredFor(d) > 0) n++;
       d = addDays(d, 1);
     }
     return n;
@@ -580,10 +727,32 @@
       var o = JSON.parse(raw);
       if (o.config) Object.assign(config, o.config);
       if (o.days) days = o.days;
+      migrate();
     } catch (e) {}
   }
 
   function persistConfig() { saveLocal(); }
+
+  /** Carry older saved files forward: the schedule used to be two numbers. */
+  function migrate() {
+    if (!config.dayHours || typeof config.dayHours !== "object") {
+      var mt = typeof config.minMonThu === "number" ? config.minMonThu : 480;
+      var fr = typeof config.minFri === "number" ? config.minFri : 450;
+      config.dayHours = { "0": 0, "1": mt, "2": mt, "3": mt, "4": mt, "5": fr, "6": 0 };
+    }
+    for (var i = 0; i < 7; i++) {
+      var v = Number(config.dayHours[String(i)]);
+      config.dayHours[String(i)] = isFinite(v) && v > 0 ? Math.round(v) : 0;
+    }
+    delete config.minMonThu; delete config.minFri;
+    if (!Array.isArray(config.holidays)) config.holidays = [];
+    if (["even", "fixed"].indexOf(config.catchUp) === -1) config.catchUp = "even";
+    if (["system", "light", "dark"].indexOf(config.theme) === -1) config.theme = "system";
+    if ([0, 1, 5, 10, 15].indexOf(Number(config.roundMin)) === -1) config.roundMin = 5;
+    config.roundMin = Number(config.roundMin);
+    if ([0, 1, 6].indexOf(Number(config.weekStart)) === -1) config.weekStart = 1;
+    config.weekStart = Number(config.weekStart);
+  }
   function persistDay() { saveLocal(); }
   /* ------------------------------------------------------------------ *
    * Mutations
@@ -600,10 +769,10 @@
     var rec = ensureDay(ds);
     var open = rec.segments.filter(function (s) { return !s.end; })[0];
     if (open) {
-      open.end = toHHMM(nowMin());
+      open.end = toHHMM(roundPunch(nowMin()));
       if (toMin(open.end) === toMin(open.start)) open.end = toHHMM(toMin(open.start) + 1);
     } else {
-      rec.segments.push({ start: toHHMM(nowMin()), end: "" });
+      rec.segments.push({ start: toHHMM(roundPunch(nowMin())), end: "" });
     }
     sortSegs(rec); persistDay(ds); render();
   }
@@ -633,8 +802,7 @@
     renderAlerts();
     renderToday();
     renderPace();
-    renderWeek();
-    renderLedger();
+    renderCalendar();
     renderSettings();
   }
 
@@ -653,8 +821,18 @@
 
     var d = parseYmd(config.targetDate);
     el("balNote").textContent = bal < 0
-      ? "to clear by " + d.getDate() + " " + MON[d.getMonth()] + " • live, including today"
+      ? "by " + d.getDate() + " " + MON[d.getMonth()] + " — live, including today"
       : "you're ahead — live, including today";
+
+    // The single line the Today screen carries. Everything else about the
+    // year-to-date position lives one tap away, in the Ledger.
+    var sa = el("slBal"), sn = el("slNote");
+    sa.className = "sl-a mono " + (bal < 0 ? "neg" : bal > 0 ? "pos" : "");
+    sa.textContent = signed(bal);
+    var leftDays = workdaysBetween(today(), config.targetDate);
+    sn.textContent = bal < 0
+      ? leftDays + (leftDays === 1 ? " workday" : " workdays") + " left to clear it"
+      : "ahead of the standard week";
   }
 
   function renderAlerts() {
@@ -669,11 +847,7 @@
       st.innerHTML = "<b>Set your starting balance.</b> Open your HR portal, read the year-to-date balance, and enter it below with the date it covers. Everything else is calculated from that.";
       var sb = document.createElement("button");
       sb.textContent = "Open settings";
-      sb.onclick = function () {
-        var p = el("setupPanel"); p.open = true;
-        p.scrollIntoView({ block: "center", behavior: "smooth" });
-        el("cfgH").focus();
-      };
+      sb.onclick = function () { showTab("Settings"); el("cfgH").focus(); };
       s.appendChild(st); s.appendChild(sb);
       box.appendChild(s);
       return;
@@ -691,7 +865,7 @@
       ". They're excluded from the balance above; if you truly didn't work them that's another " + dur(lost) + " of debt.";
     var btn = document.createElement("button");
     btn.textContent = "Open " + prettyDate(missing[missing.length - 1]);
-    btn.onclick = function () { viewDate = missing[missing.length - 1]; render(); el("todayCard").scrollIntoView({ block: "center" }); };
+    btn.onclick = function () { viewDate = missing[missing.length - 1]; showTab("Today"); render(); };
     span.appendChild(document.createElement("br"));
     div.appendChild(span);
     div.appendChild(btn);
@@ -715,12 +889,10 @@
       ? (parseYmd(ds).getDay() === 5 ? "Friday · " + dur(req) : "Workday · " + dur(req))
       : type === "leave" ? "Leave" : type === "holiday" ? "Public holiday" : "Off";
     el("dayTypeSel").value = type;
-    el("dayJump").value = ds;
 
     // catch-up share for this day
     var opening = balanceThrough(addDays(ds, -1));
-    var daysLeftInclusive = Math.max(1, workdaysBetween(ds, config.targetDate));
-    var extra = (type === "work" && opening < 0) ? Math.ceil(-opening / daysLeftInclusive) : 0;
+    var extra = extraFor(opening, ds);
     var target = req + extra;
 
     // meter
@@ -731,47 +903,45 @@
     el("dayMark").style.left = Math.min(100, (req / span) * 100).toFixed(1) + "%";
     el("dayWorked").textContent = dur(worked) + " worked" + (open ? " · running" : "");
     el("dayTarget").textContent = type === "work"
-      ? "target " + dur(target) + (extra ? " (" + dur(req) + " + " + dur(extra) + ")" : "")
-      : "no hours required";
+      ? "target " + dur(target) + (extra ? "  \u00b7  " + dur(req) + " + " + dur(extra) : "")
+      : "nothing required";
 
-    // log-out times
-    var base = open ? toMin(open.start) + (target - closed) : (isToday ? nowMin() + (target - closed) : null);
-    var baseEven = open ? toMin(open.start) + (req - closed) : (isToday ? nowMin() + (req - closed) : null);
-    var leaveEl = el("leaveAt");
+    // ---- the one number: when can you walk out -------------------------
+    var heroK = el("heroK"), heroV = el("leaveAt"), heroS = el("heroSub");
+    heroV.className = "v mono";
+
     if (type !== "work") {
-      leaveEl.textContent = "—";
-      el("evenAt").textContent = "—";
+      heroK.textContent = type === "leave" ? "On leave" : type === "holiday" ? "Public holiday" : "Not a working day";
+      heroV.className = "v mono small";
+      heroV.textContent = worked > 0 ? "+" + dur(worked) : "no hours due";
+      heroS.textContent = worked > 0 ? "everything you log today is pure credit" : "\u00a0";
     } else if (worked >= target) {
-      leaveEl.textContent = "done";
-      leaveEl.style.color = "var(--credit)";
-      el("evenAt").textContent = baseEven != null ? toHHMM(baseEven) : "—";
-    } else if (base == null) {
-      leaveEl.textContent = "—";
-      el("evenAt").textContent = "—";
+      heroK.textContent = open ? "You can go" : "Done for today";
+      heroV.className = "v mono done";
+      heroV.textContent = open ? toHHMM(toMin(open.start) + (target - closed)) : "done";
+      heroS.textContent = "+" + dur(worked - req) + " on the day" + (extra ? ", including the " + dur(extra) + " catch-up" : "");
+    } else if (open) {
+      heroK.textContent = "Log out at";
+      heroV.textContent = toHHMM(toMin(open.start) + (target - closed));
+      heroS.textContent = dur(target - worked) + " to go" +
+        (extra ? " \u00b7 break even at " + toHHMM(toMin(open.start) + (req - closed)) : "");
+    } else if (isToday) {
+      heroK.textContent = closed ? "Still to work today" : "Today's target";
+      heroV.className = "v mono small";
+      heroV.textContent = dur(target - worked) + " left";
+      heroS.textContent = "leaving now puts you at " + signed(opening + (worked - req));
     } else {
-      leaveEl.style.color = "";
-      leaveEl.textContent = toHHMM(base);
-      el("evenAt").textContent = worked >= req ? "met" : toHHMM(baseEven);
-    }
-    if (worked < target && type === "work") leaveEl.style.color = "";
-
-    var lnn = el("leaveNowNote");
-    var anySeg = !!(rec && rec.segments.length);
-    if (type === "work" && isToday && anySeg) {
-      var stopNow = open ? closed + segMinutes(open, ds) : closed;
-      var after = balanceThrough(addDays(ds, -1)) + (stopNow - req);
-      lnn.innerHTML = "stop now → <b class=\"mono\">" + signed(after) + "</b>";
-    } else if (anySeg || !isToday) {
-      lnn.innerHTML = "day balance <b class=\"mono\">" + signed(worked - req) + "</b>";
-    } else {
-      lnn.innerHTML = "catch-up share <b class=\"mono\">" + (extra ? "+" + dur(extra) : "none") + "</b>";
+      heroK.textContent = "Day balance";
+      heroV.className = "v mono small" + (worked - req >= 0 ? " done" : "");
+      heroV.textContent = signed(worked - req);
+      heroS.textContent = dur(worked) + " logged against " + dur(req);
     }
 
-    // punch button
+    // the primary action, labelled by what it will actually do
     var pb = el("punchBtn");
     if (!isToday) { pb.textContent = "Add block"; pb.onclick = addBlock; }
-    else if (open) { pb.textContent = "Clock out · " + dur(segMinutes(open, ds)); pb.onclick = punch; }
-    else { pb.textContent = "Clock in now"; pb.onclick = punch; }
+    else if (open) { pb.textContent = "Clock out \u00b7 " + dur(segMinutes(open, ds)); pb.onclick = punch; }
+    else { pb.textContent = closed ? "Clock back in" : "Clock in now"; pb.onclick = punch; }
 
     renderSegs(ds);
   }
@@ -832,107 +1002,129 @@
     var opening = balanceThrough(addDays(t, -1));
     var debt = Math.max(0, -opening);
     var left = Math.max(1, workdaysBetween(t, config.targetDate));
-    var perDay = debt / left;
-    var normal = requiredBetween(t, config.targetDate);
+    var perDay = config.catchUp === "fixed" ? Math.min(config.fixedExtraMin, debt) : debt / left;
 
     el("pDay").textContent = debt ? "+" + dur(perDay) : "—";
-    el("pDayH").textContent = debt ? "on top of your normal shift" : "you're square — just hit the standard day";
-    el("pWeek").textContent = debt ? "+" + dur(perDay * 5) : "—";
+    el("pDayH").textContent = !debt ? "you're square — just hit the standard day"
+      : config.catchUp === "fixed" ? "fixed, from settings" : "spread over the days left";
     el("pDays").textContent = String(left);
-    el("pHours").textContent = dur(normal + debt);
-    var d = parseYmd(config.targetDate);
-    el("paceTarget").textContent = "to " + d.getDate() + " " + MON[d.getMonth()];
+    // The target date is already in the line above; this chip only earns its
+    // place when a fixed daily amount will not actually reach zero in time.
+    var chip = el("paceTarget");
+    var short = debt && config.catchUp === "fixed" && perDay * left < debt;
+    chip.parentNode.hidden = !short;
+    if (short) {
+      chip.className = "chip leave";
+      chip.textContent = "won't clear \u2014 short by " + dur(debt - perDay * left);
+    }
   }
 
-  function renderWeek() {
+  /* ------------------------------------------------------------------ *
+   * Month grid — the same object shows what happened and what is planned
+   * ------------------------------------------------------------------ */
+
+  var DOW_MIN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+  function monthKey(ds) { return ds.slice(0, 7); }
+  function monthShift(mk, n) {
+    var y = +mk.slice(0, 4), m = +mk.slice(5, 7) - 1 + n;
+    var d = new Date(y, m, 1);
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1);
+  }
+
+  function renderCalendar() {
+    if (!calMonth) calMonth = monthKey(today());
+    var y = +calMonth.slice(0, 4), mo = +calMonth.slice(5, 7) - 1;
+    var first = new Date(y, mo, 1);
+    var lastDay = new Date(y, mo + 1, 0).getDate();
     var t = today();
-    var dow = parseYmd(t).getDay();
-    var back = dow === 0 ? 6 : dow - 1;                // week starts Monday
-    var mon = addDays(t, -back);
-    var sun = addDays(mon, 6);
-    var worked = 0, reqSoFar = 0, reqAll = 0;
+    var from = addDays(config.baselineDate, 1);
+
+    el("calMonth").textContent = MON[mo] + " " + y;
+
+    // weekday header, in the user's week order
+    var dowBox = el("calDow");
+    dowBox.innerHTML = "";
     for (var i = 0; i < 7; i++) {
-      var d = addDays(mon, i);
-      reqAll += requiredFor(d);
-      if (d <= t) { worked += workedFor(d); if (hasLog(d) || d === t) reqSoFar += requiredFor(d); }
-    }
-    el("wkWorked").textContent = dur(worked);
-    el("wkReq").textContent = dur(reqSoFar);
-    var wb = el("wkBal");
-    wb.textContent = signed(worked - reqSoFar);
-    wb.style.color = worked - reqSoFar < 0 ? "var(--debt)" : "var(--credit)";
-    el("wkLeft").textContent = dur(Math.max(0, reqAll - worked));
-    void sun;
-  }
-
-  function renderLedger() {
-    var box = el("ledger");
-    box.innerHTML = "";
-    var t = today();
-    var from = ledgerFull ? addDays(config.baselineDate, 1) : addDays(t, -13);
-    if (from < addDays(config.baselineDate, 1)) from = addDays(config.baselineDate, 1);
-    el("rangeBtn").textContent = ledgerFull ? "since baseline ▾" : "last 14 days ▾";
-
-    var list = [];
-    var d = from, guard = 0;
-    while (d <= t && guard++ < 400) { list.push(d); d = addDays(d, 1); }
-    list.reverse();
-
-    if (!list.length) {
-      var p = document.createElement("div");
-      p.className = "empty"; p.style.padding = "14px";
-      p.textContent = "Nothing after the baseline date yet.";
-      box.appendChild(p);
-      return;
+      var sp = document.createElement("span");
+      sp.textContent = DOW_MIN[(config.weekStart + i) % 7];
+      dowBox.appendChild(sp);
     }
 
-    var lastWeek = null;
-    list.forEach(function (ds) {
-      var wd = parseYmd(ds);
-      var back = wd.getDay() === 0 ? 6 : wd.getDay() - 1;
-      var weekKey = addDays(ds, -back);
-      if (weekKey !== lastWeek) {
-        lastWeek = weekKey;
-        var wsum = 0, wreq = 0;
-        for (var i = 0; i < 7; i++) {
-          var wd2 = addDays(weekKey, i);
-          if (wd2 <= t && wd2 >= addDays(config.baselineDate, 1) && hasLog(wd2)) { wsum += workedFor(wd2); wreq += requiredFor(wd2); }
-        }
-        var h = document.createElement("div");
-        h.className = "weekhdr";
-        h.innerHTML = "<span>week of " + prettyDate(weekKey) + "</span><span class=\"mono\">" + signed(wsum - wreq) + "</span>";
-        box.appendChild(h);
-      }
+    var grid = el("calGrid");
+    grid.innerHTML = "";
 
+    var lead = (first.getDay() - config.weekStart + 7) % 7;
+    for (var b = 0; b < lead; b++) {
+      var sp2 = document.createElement("div");
+      sp2.className = "cal blank";
+      grid.appendChild(sp2);
+    }
+
+    var loggedDays = 0, monthDelta = 0, unlogged = 0, aheadDays = 0, aheadMins = 0;
+
+    for (var dnum = 1; dnum <= lastDay; dnum++) {
+      var ds = y + "-" + pad(mo + 1) + "-" + pad(dnum);
       var type = dayType(ds);
       var req = requiredFor(ds);
       var worked = workedFor(ds);
       var logged = hasLog(ds);
-      var delta = worked - req;
+      var counts = ds >= from;           // days on or before the baseline are settled
+      var past = ds <= t;
 
-      var row = document.createElement("button");
-      row.className = "lrow";
-      if (ds === viewDate) row.setAttribute("aria-current", "true");
-      row.onclick = function () { viewDate = ds; render(); el("todayCard").scrollIntoView({ block: "center", behavior: "smooth" }); };
+      var cell = document.createElement("button");
+      cell.className = "cal";
+      cell.textContent = String(dnum);
+      var label = prettyDate(ds) + ": ";
 
-      var c1 = document.createElement("div");
-      c1.className = "d mono";
-      c1.innerHTML = prettyDate(ds).replace(/^(\w{3}) /, "<em>$1</em> ");
+      if (type !== "work") {
+        cell.classList.add(type === "off" ? "off" : "leave");
+        label += type === "off" ? "not a working day" : type;
+        if (worked > 0) label += ", " + dur(worked) + " logged";
+      } else if (!past || !counts) {
+        cell.classList.add("future");
+        label += dur(req) + " required";
+        if (past) label += " (before the baseline)";
+        if (!past) { aheadDays++; aheadMins += req; }
+      } else if (!logged) {
+        cell.classList.add("unlogged");
+        label += "not logged";
+        unlogged++;
+      } else {
+        var delta = worked - req;
+        loggedDays++; monthDelta += delta;
+        // intensity tracks how far off the day was, capped at a full shift
+        var mag = Math.min(1, Math.abs(delta) / Math.max(60, req || 480));
+        var pct = Math.round(20 + mag * 58);
+        var hue = delta >= 0 ? "var(--credit)" : "var(--debt)";
+        cell.style.background = "color-mix(in srgb, " + hue + " " + pct + "%, var(--card-2))";
+        if (pct > 46) cell.classList.add("strong");
+        label += dur(worked) + " of " + dur(req) + ", " + signed(delta);
+      }
 
-      var c2 = document.createElement("div");
-      c2.className = "w";
-      if (type !== "work") c2.textContent = type === "leave" ? "leave" : type === "holiday" ? "public holiday" : "off";
-      else if (!logged) c2.textContent = "not logged";
-      else c2.textContent = dur(worked) + " / " + dur(req);
+      if (ds === t) cell.classList.add("today");
+      if (ds === viewDate) cell.style.outline = "2px solid var(--ink-3)";
+      cell.setAttribute("aria-label", label);
+      cell.title = label;
+      (function (d) { cell.onclick = function () { viewDate = d; showTab("Today"); render(); }; })(ds);
 
-      var c3 = document.createElement("div");
-      c3.className = "delta mono " + (!logged || type !== "work" ? "zero" : delta < 0 ? "neg" : delta > 0 ? "pos" : "zero");
-      c3.textContent = (!logged && type === "work") ? "—" : (type !== "work" ? "·" : signed(delta));
+      grid.appendChild(cell);
+    }
 
-      row.appendChild(c1); row.appendChild(c2); row.appendChild(c3);
-      box.appendChild(row);
-    });
+    var a = el("calFootA"), bfoot = el("calFootB");
+    if (loggedDays) {
+      a.innerHTML = loggedDays + (loggedDays === 1 ? " day logged " : " days logged ") +
+        '<b class="' + (monthDelta < 0 ? "neg" : "pos") + '">' + signed(monthDelta) + "</b>";
+    } else {
+      a.textContent = aheadDays ? "nothing logged yet" : "nothing to log";
+    }
+    var bits = [];
+    if (unlogged) bits.push(unlogged + " missing");
+    if (aheadDays) bits.push(aheadDays + " workdays ahead \u00b7 " + dur(aheadMins));
+    bfoot.textContent = bits.join("  \u00b7  ");
   }
+
+  var DOW_FULL = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   function renderSettings() {
     var m = config.baselineMin;
@@ -940,32 +1132,125 @@
     // just picked (m is still 0 until they type the hours), nor the field they
     // are typing into.
     if (m !== 0) el("cfgSign").value = m < 0 ? "-" : "+";
-    if (document.activeElement !== el("cfgH")) el("cfgH").value = Math.floor(Math.abs(m) / 60);
-    if (document.activeElement !== el("cfgM")) el("cfgM").value = Math.abs(m) % 60;
+    setNum("cfgH", Math.floor(Math.abs(m) / 60));
+    setNum("cfgM", Math.abs(m) % 60);
     el("cfgAsOf").value = config.baselineDate;
-    el("cfgMon").value = config.minMonThu / 60;
-    el("cfgFri").value = config.minFri / 60;
     el("cfgTarget").value = config.targetDate;
+
+    var bc = el("setBalChip");
+    bc.className = "chip " + (!config.configured ? "leave" : m < 0 ? "" : "work");
+    bc.textContent = config.configured ? signed(m) : "not set";
+    if (config.configured && m < 0) bc.style.color = "var(--debt)"; else bc.style.color = "";
+
+    el("cfgCatchUp").value = config.catchUp;
+    el("fixedRow").style.display = config.catchUp === "fixed" ? "" : "none";
+    setNum("cfgFixedH", Math.floor(config.fixedExtraMin / 60));
+    setNum("cfgFixedM", config.fixedExtraMin % 60);
+
+    el("cfgWeekStart").value = String(config.weekStart);
+    el("cfgRound").value = String(config.roundMin);
+    el("cfgTheme").value = config.theme;
+
+    renderSchedule();
 
     var hl = el("holList");
     hl.innerHTML = "";
-    config.holidays.slice().sort().forEach(function (h) {
+    var hs = config.holidays.slice().sort();
+    el("setHolChip").textContent = String(hs.length);
+    hs.forEach(function (h) {
       var b = document.createElement("button");
       b.className = "chip holiday";
       b.style.cursor = "pointer";
-      b.textContent = prettyDate(h) + "  ✕";
+      b.textContent = prettyDate(h) + "  \u2715";
+      b.setAttribute("aria-label", "Remove " + prettyDate(h));
       b.onclick = function () {
         config.holidays = config.holidays.filter(function (x) { return x !== h; });
         persistConfig(); render();
       };
       hl.appendChild(b);
     });
-    if (!config.holidays.length) {
-      var s = document.createElement("span");
-      s.className = "hint";
-      s.textContent = "None set.";
-      hl.appendChild(s);
+    if (!hs.length) {
+      var sp = document.createElement("span");
+      sp.className = "hint"; sp.textContent = "None set.";
+      hl.appendChild(sp);
     }
+
+    var n = Object.keys(days).length;
+    el("setDataChip").textContent = n + (n === 1 ? " day" : " days");
+  }
+
+  /** Never clobber the field the user is currently typing into. */
+  function setNum(id, v) {
+    var e = el(id);
+    if (document.activeElement !== e) e.value = v;
+  }
+
+  function renderSchedule() {
+    var box = el("schedRows");
+    box.innerHTML = "";
+    var total = 0, workdays = 0;
+    var order = [];
+    for (var i = 0; i < 7; i++) order.push((config.weekStart + i) % 7);
+
+    order.forEach(function (dow) {
+      var mins = Number(config.dayHours[String(dow)]) || 0;
+      total += mins;
+      if (mins > 0) workdays++;
+
+      var row = document.createElement("div");
+      row.className = "set" + (mins ? "" : " off");
+
+      var k = document.createElement("div");
+      k.className = "k";
+      k.textContent = DOW_FULL[dow];
+      if (!mins) { var sm = document.createElement("small"); sm.textContent = "not a working day"; k.appendChild(sm); }
+
+      var c = document.createElement("div");
+      c.className = "c";
+      var h = document.createElement("input");
+      h.type = "number"; h.min = "0"; h.max = "16"; h.step = "1"; h.inputMode = "numeric";
+      h.value = Math.floor(mins / 60);
+      h.setAttribute("aria-label", DOW_FULL[dow] + " hours");
+      var hs = document.createElement("span"); hs.className = "dash"; hs.textContent = "h";
+      var mm = document.createElement("input");
+      mm.type = "number"; mm.min = "0"; mm.max = "59"; mm.step = "15"; mm.inputMode = "numeric";
+      mm.value = mins % 60;
+      mm.setAttribute("aria-label", DOW_FULL[dow] + " minutes");
+      var ms = document.createElement("span"); ms.className = "dash"; ms.textContent = "m";
+
+      function commit() {
+        var hv = Math.max(0, Math.min(16, parseInt(h.value, 10) || 0));
+        var mv = Math.max(0, Math.min(59, parseInt(mm.value, 10) || 0));
+        config.dayHours[String(dow)] = hv * 60 + mv;
+        persistConfig(); render();
+      }
+      h.onchange = commit; mm.onchange = commit;
+
+      c.appendChild(h); c.appendChild(hs); c.appendChild(mm); c.appendChild(ms);
+      row.appendChild(k); row.appendChild(c);
+      box.appendChild(row);
+    });
+
+    el("setWeekChip").textContent = dur(total) + " over " + workdays + (workdays === 1 ? " day" : " days");
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Tabs
+   * ------------------------------------------------------------------ */
+
+  var TABS = ["Today", "Ledger", "Settings"];
+  var TAB_KEY = "hourdebt.tab";
+
+  function showTab(name) {
+    if (TABS.indexOf(name) === -1) name = "Today";
+    TABS.forEach(function (t) {
+      el("tab" + t).hidden = t !== name;
+      el("nav" + t).setAttribute("aria-selected", String(t === name));
+    });
+    el("mastTitle").textContent = name === "Today" ? "Hour Debt Ledger" : name === "Ledger" ? "Ledger" : "Settings";
+    el("foot").hidden = name !== "Today";
+    try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
+    window.scrollTo(0, 0);
   }
 
   /* ------------------------------------------------------------------ *
@@ -979,8 +1264,9 @@
     rec.type = this.value;
     persistDay(viewDate); render();
   };
-  el("dayJump").onchange = function () { if (this.value) { viewDate = this.value; render(); } };
-  el("rangeBtn").onclick = function () { ledgerFull = !ledgerFull; render(); };
+  el("calPrev").onclick  = function () { calMonth = monthShift(calMonth || monthKey(today()), -1); renderCalendar(); };
+  el("calNext").onclick  = function () { calMonth = monthShift(calMonth || monthKey(today()),  1); renderCalendar(); };
+  el("calToday").onclick = function () { calMonth = monthKey(today()); renderCalendar(); };
 
   function readBaseline() {
     var sign = el("cfgSign").value === "-" ? -1 : 1;
@@ -993,9 +1279,24 @@
   }
   ["cfgSign", "cfgH", "cfgM", "cfgAsOf"].forEach(function (id) { el(id).onchange = readBaseline; });
 
-  el("cfgMon").onchange = function () { config.minMonThu = Math.round((parseFloat(this.value) || 0) * 60); persistConfig(); render(); };
-  el("cfgFri").onchange = function () { config.minFri = Math.round((parseFloat(this.value) || 0) * 60); persistConfig(); render(); };
   el("cfgTarget").onchange = function () { if (this.value) { config.targetDate = this.value; persistConfig(); render(); } };
+
+  el("cfgCatchUp").onchange = function () { config.catchUp = this.value; persistConfig(); render(); };
+  function readFixed() {
+    var h = Math.max(0, parseInt(el("cfgFixedH").value, 10) || 0);
+    var m = Math.max(0, Math.min(59, parseInt(el("cfgFixedM").value, 10) || 0));
+    config.fixedExtraMin = h * 60 + m;
+    persistConfig(); render();
+  }
+  el("cfgFixedH").onchange = readFixed;
+  el("cfgFixedM").onchange = readFixed;
+
+  el("cfgWeekStart").onchange = function () { config.weekStart = Number(this.value); persistConfig(); render(); };
+  el("cfgRound").onchange = function () { config.roundMin = Number(this.value); persistConfig(); render(); };
+  el("cfgTheme").onchange = function () { config.theme = this.value; persistConfig(); applyTheme(); render(); };
+
+  TABS.forEach(function (t) { el("nav" + t).onclick = function () { showTab(t); }; });
+  el("statusLine").onclick = function () { showTab("Ledger"); };
 
   el("holAddBtn").onclick = function () {
     var v = el("holAdd").value;
@@ -1104,10 +1405,15 @@
 
   function boot() {
     loadLocal();
+    migrate();
     var t = today();
     if (!config.baselineDate) config.baselineDate = addDays(t, -1);
     if (!config.targetDate) config.targetDate = parseYmd(t).getFullYear() + "-12-31";
     viewDate = t;
+    applyTheme();
+    var saved = "Today";
+    try { saved = localStorage.getItem(TAB_KEY) || "Today"; } catch (e) {}
+    showTab(config.configured ? saved : "Settings");
     render();
     registerSW();
     showInstallHint();
@@ -1124,7 +1430,7 @@
     if (viewDate !== today()) return;
     var rec = days[viewDate];
     var open = rec && rec.segments.some(function (s) { return !s.end; });
-    if (open) { renderBalance(); renderToday(); renderPace(); renderWeek(); }
+    if (open) { renderBalance(); renderToday(); renderPace(); }
   }, 15000);
 
   // roll over at midnight

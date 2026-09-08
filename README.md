@@ -10,15 +10,31 @@ network requests of any kind — the fonts are the platform's own.
 
 **Today** answers one question — when can you log out — and carries nothing else
 but the blocks you are logging and one quiet status line. **Ledger** is the
-review: balance, pace, this week, day by day. **Settings** holds every
+review: the balance, two numbers, and a month grid. **Settings** holds every
 parameter. Nothing on the Today screen needs configuring, and nothing in
 Settings needs looking at daily.
+
+The month grid is both the record and the plan. Past days are shaded green or
+red by how far off the day landed; days before the baseline, weekends and
+non-working days stay plain; a missed workday shows a dashed amber outline.
+Future days are outlines you can tap to mark as leave — which is the point:
+booking time off does not shrink the debt, it removes days you could have paid
+it with, and the daily figure moves the moment you mark them.
+
+## How the catch-up is calculated
+
+Nothing is stored. On every render the app takes the balance at the end of
+yesterday and divides it by the workdays still remaining before the target
+date, so the daily ask tracks reality on its own — fall behind and it rises,
+because the debt grew *and* the days left shrank. Switch `catchUp` to `fixed`
+and it adds a set amount instead; if that will not reach zero in time, the
+Ledger says so.
 
 ## Files
 
 | File | What it is |
 |---|---|
-| `index.html` | The whole app. HTML, CSS and JS inline, three tabs. |
+| `index.html` | The whole app. HTML, CSS and JS inline, three tabs. ~62 KB. |
 | `sw.js` | Service worker. Cache-first shell so the app opens with no signal. |
 | `manifest.webmanifest` | Makes it installable to the home screen. |
 | `icon-*.png` | App icons — 192, 512, maskable 512, and 180 for iOS. |
@@ -104,4 +120,4 @@ can't drift apart.
 ## Changing it
 
 Edit `index.html` directly. If you change any file, bump `CACHE` in `sw.js`
-(`hour-debt-v3` → `v4`), or installed copies keep serving the old shell.
+(`hour-debt-v4` → `v5`), or installed copies keep serving the old shell.
