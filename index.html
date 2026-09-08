@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hour Debt Ledger</title>
+<meta name="description" content="Log your work blocks, see what time to log out, and count the hour deficit down to zero.">
+<meta name="theme-color" content="#E7EAEE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10151A" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hours">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" href="./icon-192.png" sizes="192x192">
+<style>
+  html { -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<style>
+  :root {
+    --paper:      #E7EAEE;
+    --card:       #FBFCFD;
+    --card-2:     #F1F4F7;
+    --ink:        #17212B;
+    --ink-2:      #55636F;
+    --ink-3:      #8996A2;
+    --rule:       #D3DAE1;
+    --rule-soft:  #E3E8ED;
+    --accent:     #1B5E86;
+    --accent-ink: #FFFFFF;
+    --debt:       #B23B2E;
+    --debt-bg:    #F7E4E1;
+    --credit:     #1B6E52;
+    --credit-bg:  #DFEFE8;
+    --warn:       #96620A;
+    --warn-bg:    #F8EBD3;
+    --shadow:     0 1px 2px rgba(23,33,43,.07), 0 6px 18px -10px rgba(23,33,43,.22);
+    --r:          10px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #10151A;
+      --card:       #192027;
+      --card-2:     #212A33;
+      --ink:        #E3E9EE;
+      --ink-2:      #A0AEBB;
+      --ink-3:      #6F7E8B;
+      --rule:       #2C3641;
+      --rule-soft:  #232C35;
+      --accent:     #6BB0DC;
+      --accent-ink: #0D1318;
+      --debt:       #EC8579;
+      --debt-bg:    #33201D;
+      --credit:     #56C298;
+      --credit-bg:  #143026;
+      --warn:       #D9A54A;
+      --warn-bg:    #33291480;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #10151A;
+    --card:       #192027;
+    --card-2:     #212A33;
+    --ink:        #E3E9EE;
+    --ink-2:      #A0AEBB;
+    --ink-3:      #6F7E8B;
+    --rule:       #2C3641;
+    --rule-soft:  #232C35;
+    --accent:     #6BB0DC;
+    --accent-ink: #0D1318;
+    --debt:       #EC8579;
+    --debt-bg:    #33201D;
+    --credit:     #56C298;
+    --credit-bg:  #143026;
+    --warn:       #D9A54A;
+    --warn-bg:    #33291480;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 22px -12px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 14px 14px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Roboto Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  /* ---- masthead ---- */
+  .masthead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 2px 2px 0; }
+  .masthead h1 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  .masthead .sub { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .09em; font-weight: 500; }
+
+  /* ---- card base ---- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card > .head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--card-2);
+  }
+  .card > .head .t { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-2); }
+  .card > .body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ---- balance band ---- */
+  .balance { text-align: center; padding: 18px 14px 14px; }
+  .balance .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); font-weight: 600; }
+  .balance .big { font-size: 44px; font-weight: 600; letter-spacing: -.03em; line-height: 1.05; margin-top: 4px; }
+  .balance .big.neg { color: var(--debt); }
+  .balance .big.pos { color: var(--credit); }
+  .balance .note { font-size: 12.5px; color: var(--ink-2); margin-top: 5px; }
+  .track { height: 7px; border-radius: 4px; background: var(--rule-soft); margin: 14px 0 0; overflow: hidden; display: flex; }
+  .track > i { display: block; height: 100%; background: var(--credit); }
+  .track-cap { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+
+  /* ---- leave-at hero ---- */
+  .leaveat { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .leaveat .main .k { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); font-weight: 600; }
+  .leaveat .main .v { font-size: 38px; font-weight: 600; letter-spacing: -.02em; line-height: 1.05; }
+  .leaveat .alt { text-align: right; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .leaveat .alt b { font-weight: 600; color: var(--ink); }
+
+  .meterwrap { display: flex; flex-direction: column; gap: 5px; }
+  .meter { height: 10px; border-radius: 5px; background: var(--rule-soft); position: relative; overflow: hidden; }
+  .meter > .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+  .meter > .fill.done { background: var(--credit); }
+  .meter > .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); opacity: .55; }
+  .meterlabels { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-2); }
+
+  /* ---- segments ---- */
+  .segs { display: flex; flex-direction: column; gap: 0; }
+  .seg {
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px;
+    padding: 8px 0; border-bottom: 1px dashed var(--rule-soft);
+  }
+  .seg:last-child { border-bottom: 0; }
+  .seg .times { display: flex; align-items: center; gap: 6px; }
+  .seg .dur { font-size: 13px; color: var(--ink-2); min-width: 62px; text-align: right; }
+  .seg.open .dur { color: var(--accent); font-weight: 600; }
+  .gap { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-3); padding: 4px 0 4px 2px; font-style: italic; }
+  .empty { font-size: 13px; color: var(--ink-3); padding: 6px 0; }
+
+  input[type="time"], input[type="date"], input[type="number"], select {
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--card-2);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 6px 8px;
+    min-height: 36px;
+    max-width: 100%;
+  }
+  select { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif; }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .dash { color: var(--ink-3); font-size: 13px; }
+
+  button {
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    color: var(--ink); background: var(--card-2);
+    border: 1px solid var(--rule); border-radius: 8px;
+    padding: 9px 12px; min-height: 40px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+  button.ghost { background: transparent; }
+  button.icon { min-height: 32px; padding: 4px 8px; font-size: 13px; color: var(--ink-3); background: transparent; border-color: transparent; }
+  button.icon:hover { color: var(--debt); }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+
+  .chip {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2); background: var(--card);
+    white-space: nowrap;
+  }
+  .chip.work { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .chip.leave { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .chip.holiday { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  .chip.off { color: var(--ink-3); }
+
+  .banner {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--warn-bg); border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+    color: var(--warn); border-radius: var(--r); padding: 11px 13px; font-size: 13px; line-height: 1.5;
+  }
+  .banner b { font-weight: 600; }
+  .banner button { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, transparent); background: transparent; min-height: 32px; padding: 4px 10px; font-size: 12.5px; }
+
+  /* ---- stats grid ---- */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule-soft); }
+  .stat { background: var(--card); padding: 12px 14px; }
+  .stat .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); font-weight: 600; }
+  .stat .v { font-size: 21px; font-weight: 600; letter-spacing: -.02em; margin-top: 2px; }
+  .stat .h { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
+
+  /* ---- ledger ---- */
+  .ledger { display: flex; flex-direction: column; }
+  .lrow {
+    display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 10px;
+    padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); cursor: pointer; text-align: left;
+    background: transparent; border-left: 0; border-right: 0; border-top: 0; border-radius: 0; min-height: 0;
+    font-size: 14px; width: 100%; color: var(--ink);
+  }
+  .lrow:last-child { border-bottom: 0; }
+  .lrow[aria-current="true"] { background: var(--card-2); }
+  .lrow .d { font-size: 12.5px; color: var(--ink-2); }
+  .lrow .d em { font-style: normal; color: var(--ink-3); }
+  .lrow .w { font-size: 13px; color: var(--ink-2); }
+  .lrow .delta { font-weight: 600; font-size: 14px; }
+  .delta.neg { color: var(--debt); }
+  .delta.pos { color: var(--credit); }
+  .delta.zero { color: var(--ink-3); }
+
+  .weekhdr {
+    padding: 7px 14px; background: var(--card-2); border-bottom: 1px solid var(--rule-soft);
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3); font-weight: 600;
+    display: flex; justify-content: space-between;
+  }
+
+  details.panel { border-top: 1px solid var(--rule-soft); }
+  details.panel > summary {
+    list-style: none; cursor: pointer; padding: 11px 14px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--ink-2);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::after { content: "＋"; color: var(--ink-3); font-weight: 400; }
+  details.panel[open] > summary::after { content: "−"; }
+  details.panel > .inner { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field > label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; }
+  .field .hint { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+  .inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .inline input[type="number"] { width: 74px; }
+
+  .foot { font-size: 11.5px; color: var(--ink-3); text-align: center; line-height: 1.6; padding: 0 8px; }
+  .sync { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--ink-3); }
+  .sync.on { color: var(--credit); }
+
+  .sync.bad { color: var(--debt); }
+
+  /* installed-app chrome: respect the notch and the home indicator */
+  .wrap { padding-top: max(14px, env(safe-area-inset-top)); padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)); }
+
+  .install { display: none; }
+  .install.show { display: flex; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>Hour Debt Ledger</h1>
+    <span class="sub sync" id="syncState">on device</span>
+  </div>
+
+  <section class="card">
+    <div class="balance">
+      <div class="lbl">Balance to year end</div>
+      <div class="big mono neg" id="balBig">−64h 23m</div>
+      <div class="note" id="balNote">Loading…</div>
+      <div class="track"><i id="trackFill" style="width:0%"></i></div>
+      <div class="track-cap"><span id="trackA">0h cleared</span><span id="trackB">of 64h 23m</span></div>
+    </div>
+  </section>
+
+  <div id="alerts"></div>
+  <div class="banner install" id="installHint"></div>
+
+  <section class="card" id="todayCard">
+    <div class="head">
+      <span class="t" id="todayLabel">Today</span>
+      <span class="chip work" id="todayChip">Workday</span>
+    </div>
+    <div class="body">
+      <div class="leaveat">
+        <div class="main">
+          <div class="k">Log out at</div>
+          <div class="v mono" id="leaveAt">—</div>
+        </div>
+        <div class="alt">
+          <div>break even <b class="mono" id="evenAt">—</b></div>
+          <div id="leaveNowNote">leave now → <b class="mono">—</b></div>
+        </div>
+      </div>
+
+      <div class="meterwrap">
+        <div class="meter">
+          <div class="fill" id="dayFill" style="width:0%"></div>
+          <div class="mark" id="dayMark" style="left:0%"></div>
+        </div>
+        <div class="meterlabels">
+          <span id="dayWorked">0h 00m worked</span>
+          <span id="dayTarget">target 8h 47m</span>
+        </div>
+      </div>
+
+      <div class="segs" id="segs"></div>
+
+      <div class="row">
+        <button id="punchBtn" class="primary">Clock in now</button>
+        <button id="addBtn" class="ghost">Add block</button>
+      </div>
+      <div class="row">
+        <select id="dayTypeSel" aria-label="Day type">
+          <option value="work">Working day</option>
+          <option value="leave">Leave (paid)</option>
+          <option value="holiday">Public holiday</option>
+          <option value="off">Weekend / off</option>
+        </select>
+        <input type="date" id="dayJump" aria-label="Jump to date">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head"><span class="t">Pace</span><span class="chip" id="paceTarget">to 31 Dec</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Extra per day</div><div class="v mono" id="pDay">—</div><div class="h" id="pDayH">on top of your normal shift</div></div>
+      <div class="stat"><div class="k">Extra per week</div><div class="v mono" id="pWeek">—</div><div class="h" id="pWeekH">5-day week</div></div>
+      <div class="stat"><div class="k">Workdays left</div><div class="v mono" id="pDays">—</div><div class="h" id="pDaysH">incl. today</div></div>
+      <div class="stat"><div class="k">Hours to log</div><div class="v mono" id="pHours">—</div><div class="h">normal + catch-up</div></div>
+    </div>
+    <details class="panel">
+      <summary>This week</summary>
+      <div class="inner">
+        <div class="stats" style="border-radius:8px;overflow:hidden;border:1px solid var(--rule-soft)">
+          <div class="stat"><div class="k">Worked</div><div class="v mono" id="wkWorked">—</div></div>
+          <div class="stat"><div class="k">Required so far</div><div class="v mono" id="wkReq">—</div></div>
+          <div class="stat"><div class="k">Week balance</div><div class="v mono" id="wkBal">—</div></div>
+          <div class="stat"><div class="k">Left this week</div><div class="v mono" id="wkLeft">—</div></div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <div class="head"><span class="t">Ledger</span><button class="icon" id="rangeBtn">last 14 days ▾</button></div>
+    <div class="ledger" id="ledger"></div>
+  </section>
+
+  <section class="card">
+    <details class="panel" id="setupPanel" style="border-top:0">
+      <summary>Settings &amp; resync</summary>
+      <div class="inner">
+        <div class="field">
+          <label>Official balance from the HR portal</label>
+          <div class="inline">
+            <select id="cfgSign"><option value="-">behind by</option><option value="+">ahead by</option></select>
+            <input type="number" id="cfgH" min="0" max="999" step="1" inputmode="numeric"><span class="dash">h</span>
+            <input type="number" id="cfgM" min="0" max="59" step="1" inputmode="numeric"><span class="dash">m</span>
+          </div>
+          <div class="inline"><span class="dash">as of end of</span><input type="date" id="cfgAsOf"></div>
+          <div class="hint">Everything above is calculated from here. Days on or before this date stop counting, so set it to the last day the portal figure already covers — then re-enter the portal figure every week or two so the two never drift apart.</div>
+        </div>
+        <div class="field">
+          <label>Standard day</label>
+          <div class="inline">
+            <span class="dash">Mon–Thu</span><input type="number" id="cfgMon" min="0" max="16" step="0.25" inputmode="decimal"><span class="dash">h</span>
+            <span class="dash">Fri</span><input type="number" id="cfgFri" min="0" max="16" step="0.25" inputmode="decimal"><span class="dash">h</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Clear the debt by</label>
+          <input type="date" id="cfgTarget">
+          <div class="hint">Public holidays and leave don't shrink the debt — they only remove days you could have used to pay it off. Finishing before 31 Dec leaves you a buffer.</div>
+        </div>
+        <div class="field">
+          <label>Public holidays</label>
+          <div id="holList" class="inline"></div>
+          <div class="inline"><input type="date" id="holAdd"><button id="holAddBtn" class="ghost">Add</button></div>
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <div class="row"><button id="backupBtn" class="ghost">Save backup file</button><button id="restoreBtn" class="ghost">Restore from file</button></div>
+          <div class="row"><button id="exportBtn" class="ghost">Copy as JSON</button><button id="resetBtn" class="ghost">Clear all entries</button></div>
+          <input type="file" id="restoreFile" accept="application/json,.json" hidden>
+          <div class="hint">Everything lives in this browser's storage on this phone and never leaves it. That also means clearing site data wipes it &mdash; take a backup file every few weeks.</div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <p class="foot" id="foot">Works with no signal. Times are yours to enter; nothing here talks to the HR system, and nothing leaves this phone. Treat the portal as the source of truth and resync the baseline above regularly.</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ *
+   * Model
+   * ------------------------------------------------------------------ */
+
+  var DEFAULT_CONFIG = {
+    configured: false,
+    baselineMin: 0,
+    baselineDate: "",              // balance is true as of END of this day
+    targetDate: "",
+    minMonThu: 480,
+    minFri: 450,
+    holidays: ["2026-11-09", "2026-12-25"]
+  };
+
+  var config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  var days = {};                   // "YYYY-MM-DD" -> { type, segments:[{start,end}] }
+  var viewDate = null;             // date shown in the Today card
+  var ledgerFull = false;
+  var LS = "hourdebt.v1";
+
+  /* ------------------------------------------------------------------ *
+   * Date + duration helpers
+   * ------------------------------------------------------------------ */
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parseYmd(s) { var p = String(s).split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function addDays(s, n) { var d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); }
+  function today() { return ymd(new Date()); }
+  function nowMin() { var d = new Date(); return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60; }
+
+  var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  function toMin(hhmm) {
+    if (!hhmm) return null;
+    var p = String(hhmm).split(":");
+    if (p.length < 2) return null;
+    var m = (+p[0]) * 60 + (+p[1]);
+    return isFinite(m) ? m : null;
+  }
+  function toHHMM(mins) {
+    var m = ((Math.round(mins) % 1440) + 1440) % 1440;
+    return pad(Math.floor(m / 60)) + ":" + pad(m % 60);
+  }
+  function dur(mins) {
+    var m = Math.max(0, Math.round(mins));
+    return Math.floor(m / 60) + "h " + pad(m % 60) + "m";
+  }
+  function signed(mins) {
+    var m = Math.round(mins);
+    if (m === 0) return "0h 00m";
+    return (m < 0 ? "−" : "+") + dur(Math.abs(m));
+  }
+  function prettyDate(s) {
+    var d = parseYmd(s);
+    return DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()];
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Day maths
+   * ------------------------------------------------------------------ */
+
+  function dayType(ds) {
+    var rec = days[ds];
+    if (rec && rec.type) return rec.type;
+    if (config.holidays.indexOf(ds) !== -1) return "holiday";
+    var w = parseYmd(ds).getDay();
+    if (w === 0 || w === 6) return "off";
+    return "work";
+  }
+
+  function requiredFor(ds) {
+    if (dayType(ds) !== "work") return 0;
+    return parseYmd(ds).getDay() === 5 ? config.minFri : config.minMonThu;
+  }
+
+  function segMinutes(seg, ds) {
+    var a = toMin(seg.start);
+    if (a === null) return 0;
+    var b = seg.end === "" || seg.end == null ? (ds === today() ? nowMin() : null) : toMin(seg.end);
+    if (b === null) return 0;
+    var d = b - a;
+    if (d < 0) d += 1440;              // shift crossing midnight
+    return Math.max(0, d);
+  }
+
+  function workedFor(ds) {
+    var rec = days[ds];
+    if (!rec || !rec.segments) return 0;
+    var t = 0;
+    for (var i = 0; i < rec.segments.length; i++) t += segMinutes(rec.segments[i], ds);
+    return t;
+  }
+
+  function hasLog(ds) {
+    var rec = days[ds];
+    return !!(rec && ((rec.segments && rec.segments.length) || (rec.type && rec.type !== "work")));
+  }
+
+  /** Balance at the END of day `through`, counting only days that carry a record. */
+  function balanceThrough(through) {
+    var bal = config.baselineMin;
+    var d = addDays(config.baselineDate, 1);
+    var guard = 0;
+    while (d <= through && guard++ < 800) {
+      if (hasLog(d)) bal += workedFor(d) - requiredFor(d);
+      d = addDays(d, 1);
+    }
+    return bal;
+  }
+
+  function unloggedWorkdays() {
+    var out = [];
+    var d = addDays(config.baselineDate, 1);
+    var t = today();
+    var guard = 0;
+    while (d < t && guard++ < 800) {
+      if (dayType(d) === "work" && !hasLog(d)) out.push(d);
+      d = addDays(d, 1);
+    }
+    return out;
+  }
+
+  function workdaysBetween(from, to) {
+    var n = 0, d = from, guard = 0;
+    while (d <= to && guard++ < 800) {
+      if (dayType(d) === "work") n++;
+      d = addDays(d, 1);
+    }
+    return n;
+  }
+
+  function requiredBetween(from, to) {
+    var n = 0, d = from, guard = 0;
+    while (d <= to && guard++ < 800) { n += requiredFor(d); d = addDays(d, 1); }
+    return n;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Persistence — db when the viewer grants it, localStorage otherwise
+   * ------------------------------------------------------------------ */
+
+  function saveLocal() {
+    var blob = JSON.stringify({ config: config, days: days, savedAt: new Date().toISOString() });
+    try {
+      localStorage.setItem(LS, blob);
+      localStorage.setItem(LS + ".bak", blob);   // survives a partial write
+    } catch (e) {
+      var w = document.getElementById("syncState");
+      if (w) { w.textContent = "not saved"; w.className = "sub sync bad"; }
+    }
+  }
+  function loadLocal() {
+    try {
+      var raw = localStorage.getItem(LS) || localStorage.getItem(LS + ".bak");
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (o.config) Object.assign(config, o.config);
+      if (o.days) days = o.days;
+    } catch (e) {}
+  }
+
+  function persistConfig() { saveLocal(); }
+  function persistDay() { saveLocal(); }
+  /* ------------------------------------------------------------------ *
+   * Mutations
+   * ------------------------------------------------------------------ */
+
+  function ensureDay(ds) {
+    if (!days[ds]) days[ds] = { type: dayType(ds), segments: [] };
+    if (!days[ds].segments) days[ds].segments = [];
+    return days[ds];
+  }
+
+  function punch() {
+    var ds = viewDate;
+    var rec = ensureDay(ds);
+    var open = rec.segments.filter(function (s) { return !s.end; })[0];
+    if (open) {
+      open.end = toHHMM(nowMin());
+      if (toMin(open.end) === toMin(open.start)) open.end = toHHMM(toMin(open.start) + 1);
+    } else {
+      rec.segments.push({ start: toHHMM(nowMin()), end: "" });
+    }
+    sortSegs(rec); persistDay(ds); render();
+  }
+
+  function addBlock() {
+    var ds = viewDate;
+    var rec = ensureDay(ds);
+    var last = rec.segments[rec.segments.length - 1];
+    var start = last && last.end ? toMin(last.end) + 60 : (ds === today() ? Math.round(nowMin() / 5) * 5 : 600);
+    rec.segments.push({ start: toHHMM(start), end: toHHMM(start + 180) });
+    sortSegs(rec); persistDay(ds); render();
+  }
+
+  function sortSegs(rec) {
+    rec.segments.sort(function (a, b) { return (toMin(a.start) || 0) - (toMin(b.start) || 0); });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Render
+   * ------------------------------------------------------------------ */
+
+  function el(id) { return document.getElementById(id); }
+
+  function render() {
+    if (!viewDate) viewDate = today();
+    renderBalance();
+    renderAlerts();
+    renderToday();
+    renderPace();
+    renderWeek();
+    renderLedger();
+    renderSettings();
+  }
+
+  function renderBalance() {
+    var bal = balanceThrough(today());
+    var big = el("balBig");
+    big.textContent = signed(bal);
+    big.className = "big mono " + (bal < 0 ? "neg" : bal > 0 ? "pos" : "");
+
+    var start = Math.abs(Math.min(0, config.baselineMin));
+    var cleared = Math.max(0, start - Math.abs(Math.min(0, bal)));
+    var pct = start ? Math.min(100, (cleared / start) * 100) : 100;
+    el("trackFill").style.width = pct.toFixed(1) + "%";
+    el("trackA").textContent = dur(cleared) + " cleared";
+    el("trackB").textContent = "of " + dur(start);
+
+    var d = parseYmd(config.targetDate);
+    el("balNote").textContent = bal < 0
+      ? "to clear by " + d.getDate() + " " + MON[d.getMonth()] + " • live, including today"
+      : "you're ahead — live, including today";
+  }
+
+  function renderAlerts() {
+    var box = el("alerts");
+    box.innerHTML = "";
+
+    if (!config.configured) {
+      var s = document.createElement("div");
+      s.className = "banner";
+      var st = document.createElement("div");
+      st.style.flex = "1";
+      st.innerHTML = "<b>Set your starting balance.</b> Open your HR portal, read the year-to-date balance, and enter it below with the date it covers. Everything else is calculated from that.";
+      var sb = document.createElement("button");
+      sb.textContent = "Open settings";
+      sb.onclick = function () {
+        var p = el("setupPanel"); p.open = true;
+        p.scrollIntoView({ block: "center", behavior: "smooth" });
+        el("cfgH").focus();
+      };
+      s.appendChild(st); s.appendChild(sb);
+      box.appendChild(s);
+      return;
+    }
+
+    var missing = unloggedWorkdays();
+    if (!missing.length) return;
+    var lost = missing.reduce(function (a, d) { return a + requiredFor(d); }, 0);
+    var div = document.createElement("div");
+    div.className = "banner";
+    var span = document.createElement("div");
+    span.style.flex = "1";
+    span.innerHTML = "<b>" + missing.length + " workday" + (missing.length > 1 ? "s" : "") + " not logged</b> since the baseline — " +
+      prettyDate(missing[0]) + (missing.length > 1 ? " … " + prettyDate(missing[missing.length - 1]) : "") +
+      ". They're excluded from the balance above; if you truly didn't work them that's another " + dur(lost) + " of debt.";
+    var btn = document.createElement("button");
+    btn.textContent = "Open " + prettyDate(missing[missing.length - 1]);
+    btn.onclick = function () { viewDate = missing[missing.length - 1]; render(); el("todayCard").scrollIntoView({ block: "center" }); };
+    span.appendChild(document.createElement("br"));
+    div.appendChild(span);
+    div.appendChild(btn);
+    box.appendChild(div);
+  }
+
+  function renderToday() {
+    var ds = viewDate;
+    var isToday = ds === today();
+    var type = dayType(ds);
+    var rec = days[ds];
+    var req = requiredFor(ds);
+    var worked = workedFor(ds);
+    var closed = 0, open = null;
+    if (rec) rec.segments.forEach(function (s) { if (s.end) closed += segMinutes(s, ds); else open = s; });
+
+    el("todayLabel").textContent = (isToday ? "Today · " : "") + prettyDate(ds);
+    var chip = el("todayChip");
+    chip.className = "chip " + type;
+    chip.textContent = type === "work"
+      ? (parseYmd(ds).getDay() === 5 ? "Friday · " + dur(req) : "Workday · " + dur(req))
+      : type === "leave" ? "Leave" : type === "holiday" ? "Public holiday" : "Off";
+    el("dayTypeSel").value = type;
+    el("dayJump").value = ds;
+
+    // catch-up share for this day
+    var opening = balanceThrough(addDays(ds, -1));
+    var daysLeftInclusive = Math.max(1, workdaysBetween(ds, config.targetDate));
+    var extra = (type === "work" && opening < 0) ? Math.ceil(-opening / daysLeftInclusive) : 0;
+    var target = req + extra;
+
+    // meter
+    var span = Math.max(target, worked, 1);
+    var fill = el("dayFill");
+    fill.style.width = Math.min(100, (worked / span) * 100).toFixed(1) + "%";
+    fill.className = "fill" + (worked >= target ? " done" : "");
+    el("dayMark").style.left = Math.min(100, (req / span) * 100).toFixed(1) + "%";
+    el("dayWorked").textContent = dur(worked) + " worked" + (open ? " · running" : "");
+    el("dayTarget").textContent = type === "work"
+      ? "target " + dur(target) + (extra ? " (" + dur(req) + " + " + dur(extra) + ")" : "")
+      : "no hours required";
+
+    // log-out times
+    var base = open ? toMin(open.start) + (target - closed) : (isToday ? nowMin() + (target - closed) : null);
+    var baseEven = open ? toMin(open.start) + (req - closed) : (isToday ? nowMin() + (req - closed) : null);
+    var leaveEl = el("leaveAt");
+    if (type !== "work") {
+      leaveEl.textContent = "—";
+      el("evenAt").textContent = "—";
+    } else if (worked >= target) {
+      leaveEl.textContent = "done";
+      leaveEl.style.color = "var(--credit)";
+      el("evenAt").textContent = baseEven != null ? toHHMM(baseEven) : "—";
+    } else if (base == null) {
+      leaveEl.textContent = "—";
+      el("evenAt").textContent = "—";
+    } else {
+      leaveEl.style.color = "";
+      leaveEl.textContent = toHHMM(base);
+      el("evenAt").textContent = worked >= req ? "met" : toHHMM(baseEven);
+    }
+    if (worked < target && type === "work") leaveEl.style.color = "";
+
+    var lnn = el("leaveNowNote");
+    var anySeg = !!(rec && rec.segments.length);
+    if (type === "work" && isToday && anySeg) {
+      var stopNow = open ? closed + segMinutes(open, ds) : closed;
+      var after = balanceThrough(addDays(ds, -1)) + (stopNow - req);
+      lnn.innerHTML = "stop now → <b class=\"mono\">" + signed(after) + "</b>";
+    } else if (anySeg || !isToday) {
+      lnn.innerHTML = "day balance <b class=\"mono\">" + signed(worked - req) + "</b>";
+    } else {
+      lnn.innerHTML = "catch-up share <b class=\"mono\">" + (extra ? "+" + dur(extra) : "none") + "</b>";
+    }
+
+    // punch button
+    var pb = el("punchBtn");
+    if (!isToday) { pb.textContent = "Add block"; pb.onclick = addBlock; }
+    else if (open) { pb.textContent = "Clock out · " + dur(segMinutes(open, ds)); pb.onclick = punch; }
+    else { pb.textContent = "Clock in now"; pb.onclick = punch; }
+
+    renderSegs(ds);
+  }
+
+  function renderSegs(ds) {
+    var box = el("segs");
+    box.innerHTML = "";
+    var rec = days[ds];
+    if (!rec || !rec.segments.length) {
+      var p = document.createElement("div");
+      p.className = "empty";
+      p.textContent = "No blocks yet. Clock in, or add one like 10:40 – 13:00.";
+      box.appendChild(p);
+      return;
+    }
+    rec.segments.forEach(function (seg, i) {
+      if (i > 0) {
+        var prev = rec.segments[i - 1];
+        if (prev.end && seg.start) {
+          var g = toMin(seg.start) - toMin(prev.end);
+          if (g > 0) {
+            var gd = document.createElement("div");
+            gd.className = "gap";
+            gd.innerHTML = "<span>break</span><span class=\"mono\">" + dur(g) + "</span>";
+            box.appendChild(gd);
+          }
+        }
+      }
+      var row = document.createElement("div");
+      row.className = "seg" + (seg.end ? "" : " open");
+
+      var times = document.createElement("div");
+      times.className = "times";
+      var a = document.createElement("input");
+      a.type = "time"; a.value = seg.start; a.setAttribute("aria-label", "Start time");
+      a.onchange = function () { seg.start = a.value; sortSegs(rec); persistDay(ds); render(); };
+      var dash = document.createElement("span"); dash.className = "dash"; dash.textContent = "–";
+      var b = document.createElement("input");
+      b.type = "time"; b.value = seg.end || ""; b.setAttribute("aria-label", "End time");
+      b.onchange = function () { seg.end = b.value; sortSegs(rec); persistDay(ds); render(); };
+      times.appendChild(a); times.appendChild(dash); times.appendChild(b);
+
+      var d = document.createElement("div");
+      d.className = "dur mono";
+      d.textContent = seg.end ? dur(segMinutes(seg, ds)) : dur(segMinutes(seg, ds)) + "…";
+
+      var x = document.createElement("button");
+      x.className = "icon"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete block");
+      x.onclick = function () { rec.segments.splice(i, 1); persistDay(ds); render(); };
+
+      row.appendChild(times); row.appendChild(d); row.appendChild(x);
+      box.appendChild(row);
+    });
+  }
+
+  function renderPace() {
+    var t = today();
+    var opening = balanceThrough(addDays(t, -1));
+    var debt = Math.max(0, -opening);
+    var left = Math.max(1, workdaysBetween(t, config.targetDate));
+    var perDay = debt / left;
+    var normal = requiredBetween(t, config.targetDate);
+
+    el("pDay").textContent = debt ? "+" + dur(perDay) : "—";
+    el("pDayH").textContent = debt ? "on top of your normal shift" : "you're square — just hit the standard day";
+    el("pWeek").textContent = debt ? "+" + dur(perDay * 5) : "—";
+    el("pDays").textContent = String(left);
+    el("pHours").textContent = dur(normal + debt);
+    var d = parseYmd(config.targetDate);
+    el("paceTarget").textContent = "to " + d.getDate() + " " + MON[d.getMonth()];
+  }
+
+  function renderWeek() {
+    var t = today();
+    var dow = parseYmd(t).getDay();
+    var back = dow === 0 ? 6 : dow - 1;                // week starts Monday
+    var mon = addDays(t, -back);
+    var sun = addDays(mon, 6);
+    var worked = 0, reqSoFar = 0, reqAll = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(mon, i);
+      reqAll += requiredFor(d);
+      if (d <= t) { worked += workedFor(d); if (hasLog(d) || d === t) reqSoFar += requiredFor(d); }
+    }
+    el("wkWorked").textContent = dur(worked);
+    el("wkReq").textContent = dur(reqSoFar);
+    var wb = el("wkBal");
+    wb.textContent = signed(worked - reqSoFar);
+    wb.style.color = worked - reqSoFar < 0 ? "var(--debt)" : "var(--credit)";
+    el("wkLeft").textContent = dur(Math.max(0, reqAll - worked));
+    void sun;
+  }
+
+  function renderLedger() {
+    var box = el("ledger");
+    box.innerHTML = "";
+    var t = today();
+    var from = ledgerFull ? addDays(config.baselineDate, 1) : addDays(t, -13);
+    if (from < addDays(config.baselineDate, 1)) from = addDays(config.baselineDate, 1);
+    el("rangeBtn").textContent = ledgerFull ? "since baseline ▾" : "last 14 days ▾";
+
+    var list = [];
+    var d = from, guard = 0;
+    while (d <= t && guard++ < 400) { list.push(d); d = addDays(d, 1); }
+    list.reverse();
+
+    if (!list.length) {
+      var p = document.createElement("div");
+      p.className = "empty"; p.style.padding = "14px";
+      p.textContent = "Nothing after the baseline date yet.";
+      box.appendChild(p);
+      return;
+    }
+
+    var lastWeek = null;
+    list.forEach(function (ds) {
+      var wd = parseYmd(ds);
+      var back = wd.getDay() === 0 ? 6 : wd.getDay() - 1;
+      var weekKey = addDays(ds, -back);
+      if (weekKey !== lastWeek) {
+        lastWeek = weekKey;
+        var wsum = 0, wreq = 0;
+        for (var i = 0; i < 7; i++) {
+          var wd2 = addDays(weekKey, i);
+          if (wd2 <= t && wd2 >= addDays(config.baselineDate, 1) && hasLog(wd2)) { wsum += workedFor(wd2); wreq += requiredFor(wd2); }
+        }
+        var h = document.createElement("div");
+        h.className = "weekhdr";
+        h.innerHTML = "<span>week of " + prettyDate(weekKey) + "</span><span class=\"mono\">" + signed(wsum - wreq) + "</span>";
+        box.appendChild(h);
+      }
+
+      var type = dayType(ds);
+      var req = requiredFor(ds);
+      var worked = workedFor(ds);
+      var logged = hasLog(ds);
+      var delta = worked - req;
+
+      var row = document.createElement("button");
+      row.className = "lrow";
+      if (ds === viewDate) row.setAttribute("aria-current", "true");
+      row.onclick = function () { viewDate = ds; render(); el("todayCard").scrollIntoView({ block: "center", behavior: "smooth" }); };
+
+      var c1 = document.createElement("div");
+      c1.className = "d mono";
+      c1.innerHTML = prettyDate(ds).replace(/^(\w{3}) /, "<em>$1</em> ");
+
+      var c2 = document.createElement("div");
+      c2.className = "w";
+      if (type !== "work") c2.textContent = type === "leave" ? "leave" : type === "holiday" ? "public holiday" : "off";
+      else if (!logged) c2.textContent = "not logged";
+      else c2.textContent = dur(worked) + " / " + dur(req);
+
+      var c3 = document.createElement("div");
+      c3.className = "delta mono " + (!logged || type !== "work" ? "zero" : delta < 0 ? "neg" : delta > 0 ? "pos" : "zero");
+      c3.textContent = (!logged && type === "work") ? "—" : (type !== "work" ? "·" : signed(delta));
+
+      row.appendChild(c1); row.appendChild(c2); row.appendChild(c3);
+      box.appendChild(row);
+    });
+  }
+
+  function renderSettings() {
+    var m = config.baselineMin;
+    // Don't fight the user mid-entry: a re-render must not reset the sign they
+    // just picked (m is still 0 until they type the hours), nor the field they
+    // are typing into.
+    if (m !== 0) el("cfgSign").value = m < 0 ? "-" : "+";
+    if (document.activeElement !== el("cfgH")) el("cfgH").value = Math.floor(Math.abs(m) / 60);
+    if (document.activeElement !== el("cfgM")) el("cfgM").value = Math.abs(m) % 60;
+    el("cfgAsOf").value = config.baselineDate;
+    el("cfgMon").value = config.minMonThu / 60;
+    el("cfgFri").value = config.minFri / 60;
+    el("cfgTarget").value = config.targetDate;
+
+    var hl = el("holList");
+    hl.innerHTML = "";
+    config.holidays.slice().sort().forEach(function (h) {
+      var b = document.createElement("button");
+      b.className = "chip holiday";
+      b.style.cursor = "pointer";
+      b.textContent = prettyDate(h) + "  ✕";
+      b.onclick = function () {
+        config.holidays = config.holidays.filter(function (x) { return x !== h; });
+        persistConfig(); render();
+      };
+      hl.appendChild(b);
+    });
+    if (!config.holidays.length) {
+      var s = document.createElement("span");
+      s.className = "hint";
+      s.textContent = "None set.";
+      hl.appendChild(s);
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Wiring
+   * ------------------------------------------------------------------ */
+
+  el("addBtn").onclick = addBlock;
+
+  el("dayTypeSel").onchange = function () {
+    var rec = ensureDay(viewDate);
+    rec.type = this.value;
+    persistDay(viewDate); render();
+  };
+  el("dayJump").onchange = function () { if (this.value) { viewDate = this.value; render(); } };
+  el("rangeBtn").onclick = function () { ledgerFull = !ledgerFull; render(); };
+
+  function readBaseline() {
+    var sign = el("cfgSign").value === "-" ? -1 : 1;
+    var h = Math.max(0, parseInt(el("cfgH").value, 10) || 0);
+    var mm = Math.max(0, Math.min(59, parseInt(el("cfgM").value, 10) || 0));
+    config.baselineMin = sign * (h * 60 + mm);
+    if (el("cfgAsOf").value) config.baselineDate = el("cfgAsOf").value;
+    config.configured = true;
+    persistConfig(); render();
+  }
+  ["cfgSign", "cfgH", "cfgM", "cfgAsOf"].forEach(function (id) { el(id).onchange = readBaseline; });
+
+  el("cfgMon").onchange = function () { config.minMonThu = Math.round((parseFloat(this.value) || 0) * 60); persistConfig(); render(); };
+  el("cfgFri").onchange = function () { config.minFri = Math.round((parseFloat(this.value) || 0) * 60); persistConfig(); render(); };
+  el("cfgTarget").onchange = function () { if (this.value) { config.targetDate = this.value; persistConfig(); render(); } };
+
+  el("holAddBtn").onclick = function () {
+    var v = el("holAdd").value;
+    if (v && config.holidays.indexOf(v) === -1) { config.holidays.push(v); persistConfig(); render(); }
+    el("holAdd").value = "";
+  };
+
+  el("exportBtn").onclick = function () {
+    var text = JSON.stringify({ config: config, days: days }, null, 2);
+    var btn = this;
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+      .then(function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy as JSON"; }, 1600); })
+      .catch(function () { btn.textContent = "Copy failed"; setTimeout(function () { btn.textContent = "Copy as JSON"; }, 1600); });
+  };
+
+  el("backupBtn").onclick = function () {
+    var name = "hour-debt-" + today() + ".json";
+    var blob = new Blob([JSON.stringify({ config: config, days: days }, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  };
+
+  el("restoreBtn").onclick = function () { el("restoreFile").click(); };
+  el("restoreFile").onchange = function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var o = JSON.parse(String(fr.result));
+        if (!o || typeof o !== "object" || !o.days) throw new Error("shape");
+        if (o.config) Object.assign(config, o.config);
+        days = o.days;
+        saveLocal(); render();
+        el("restoreBtn").textContent = "Restored";
+        setTimeout(function () { el("restoreBtn").textContent = "Restore from file"; }, 2000);
+      } catch (e) {
+        el("restoreBtn").textContent = "Not a valid backup";
+        setTimeout(function () { el("restoreBtn").textContent = "Restore from file"; }, 2600);
+      }
+    };
+    fr.readAsText(f);
+    this.value = "";
+  };
+
+  el("resetBtn").onclick = function () {
+    if (this.dataset.armed !== "1") {
+      this.dataset.armed = "1";
+      this.textContent = "Tap again to erase";
+      var b = this;
+      setTimeout(function () { b.dataset.armed = "0"; b.textContent = "Clear all entries"; }, 4000);
+      return;
+    }
+    var keys = Object.keys(days);
+    days = {};
+    saveLocal();
+    this.dataset.armed = "0"; this.textContent = "Clear all entries";
+    render();
+  };
+
+  /* ------------------------------------------------------------------ *
+   * Install prompt + service worker
+   * ------------------------------------------------------------------ */
+
+  var deferredPrompt = null;
+  var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  function showInstallHint() {
+    if (standalone) return;
+    var box = el("installHint");
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (deferredPrompt) {
+      box.innerHTML = "";
+      var t = document.createElement("div");
+      t.style.flex = "1";
+      t.innerHTML = "<b>Add it to your home screen</b> so it opens like an app and works with no signal.";
+      var b = document.createElement("button");
+      b.textContent = "Install";
+      b.onclick = function () {
+        var p = deferredPrompt; deferredPrompt = null; box.classList.remove("show");
+        p.prompt();
+      };
+      box.appendChild(t); box.appendChild(b);
+      box.classList.add("show");
+    } else if (isIOS) {
+      box.innerHTML = "<div style=\"flex:1\"><b>Add it to your home screen.</b> Tap the Share button, then <b>Add to Home Screen</b>. It then opens fullscreen and works with no signal.</div>";
+      box.classList.add("show");
+    }
+  }
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); deferredPrompt = e; showInstallHint();
+  });
+  window.addEventListener("appinstalled", function () {
+    deferredPrompt = null; el("installHint").classList.remove("show");
+  });
+
+  function registerSW() {
+    if (!("serviceWorker" in navigator)) return;
+    if (location.protocol !== "https:" && location.hostname !== "localhost") return;
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  }
+
+  function boot() {
+    loadLocal();
+    var t = today();
+    if (!config.baselineDate) config.baselineDate = addDays(t, -1);
+    if (!config.targetDate) config.targetDate = parseYmd(t).getFullYear() + "-12-31";
+    viewDate = t;
+    render();
+    registerSW();
+    showInstallHint();
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Boot
+   * ------------------------------------------------------------------ */
+
+  boot();
+
+  // keep the running clock and the "log out at" honest
+  setInterval(function () {
+    if (viewDate !== today()) return;
+    var rec = days[viewDate];
+    var open = rec && rec.segments.some(function (s) { return !s.end; });
+    if (open) { renderBalance(); renderToday(); renderPace(); renderWeek(); }
+  }, 15000);
+
+  // roll over at midnight
+  setInterval(function () {
+    if (viewDate && viewDate < today() && document.visibilityState === "visible") { /* leave the user where they are */ }
+  }, 60000);
+})();
+</script>
+
+</body>
+</html>
